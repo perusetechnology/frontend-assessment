@@ -1,21 +1,16 @@
 import React, { useState } from "react"
 import type { NextPage } from "next"
-import { GetStaticPaths } from "next"
-import { GetStaticProps } from "next"
 import Image from "next/image"
-import Link from "next/link"
 import graphClient from "../../graphql/client"
 import { GET_ALL_CHARACTERS } from "../../graphql/queries"
-import { GridColDef, GridValueGetterParams } from "@mui/x-data-grid"
-import { GridApi } from "@mui/x-data-grid"
-import { GridCellValue } from "@mui/x-data-grid"
-import { DataGrid } from "@mui/x-data-grid"
+import { GridColDef, GridCellValue, DataGrid } from "@mui/x-data-grid"
 import { Button } from "@mui/material"
 import { Container } from "@mui/material"
 import { useQuery } from "react-query"
+import { Characters } from "../../graphql/types"
 
-interface HomeProps {
-  data: any
+interface CharactersPageProps {
+  data: Characters
 }
 
 const columns: GridColDef[] = [
@@ -54,33 +49,34 @@ const columns: GridColDef[] = [
   },
 ]
 
-const Home: NextPage<HomeProps> = ({ data }) => {
-  const [page, setPage] = useState(1)
+const CharactersPage: NextPage<CharactersPageProps> = ({ data }) => {
+  const [page, setPage] = useState<number>(1)
 
-  const { data: charactersData, isLoading } = useQuery(
+  const { data: charactersData, isLoading } = useQuery<Characters>(
     ["allCharacters", page],
     async () => await graphClient.request(GET_ALL_CHARACTERS, { page: page }),
     { initialData: data }
   )
 
-  const handleClick = (e: any) => {
-    setPage(e + 1)
+  const handleClick = (_page: number) => {
+    setPage(_page > page ? page + 1 : page - 1)
   }
 
   if (isLoading) return <div>Loading</div>
 
   const {
-    characters: {
-      info: { pages, count },
-      results,
-    },
-  } = charactersData
+    info: { count },
+    results,
+  } = charactersData?.characters || {
+    info: { count: null },
+    results: null,
+  }
 
   return (
     <Container>
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
-          onPageChange={(newPage: any) => handleClick(newPage)}
+          onPageChange={(newPage: number) => handleClick(newPage)}
           paginationMode="server"
           rows={results}
           rowCount={count}
@@ -88,16 +84,17 @@ const Home: NextPage<HomeProps> = ({ data }) => {
           pageSize={20}
           rowsPerPageOptions={[20]}
           pagination
+          isRowSelectable={() => false}
         />
       </div>
     </Container>
   )
 }
 
-Home.getInitialProps = async () => {
+CharactersPage.getInitialProps = async () => {
   const data = await graphClient.request(GET_ALL_CHARACTERS)
 
   return { data }
 }
 
-export default Home
+export default CharactersPage

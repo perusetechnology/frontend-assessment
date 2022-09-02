@@ -11,9 +11,14 @@ export interface Character {
   image: string
 }
 
+export interface CharactersData {
+  info: Info
+  results: Array<Character>
+}
+
 export interface Characters {
-  characters: {
-    info: Info
-    results: Array<Character>
-  }
+  characters: CharactersData
+}
+export interface CharactersDetails {
+  charactersByIds: Array<Character>
 }

@@ -1,17 +1,16 @@
-import { request } from "http"
 import type { NextPage } from "next"
 import { GetStaticPaths } from "next"
 import { GetStaticProps } from "next"
 import Image from "next/image"
-import Link from "next/link"
-import { useQuery } from "react-query"
 import graphClient from "../../../graphql/client"
+import { GET_CHARACTER_BY_ID } from "../../../graphql/queries"
+import { CharactersDetails } from "../../../graphql/types"
 
-interface HomeProps {
-  data: any
+interface CharactersDetailsProps {
+  data: CharactersDetails
 }
 
-const Home: NextPage<HomeProps> = ({ data }) => {
+const CharacterDetails: NextPage<CharactersDetailsProps> = ({ data }) => {
   const { charactersByIds } = data
   const {
     name,
@@ -47,11 +46,14 @@ const Home: NextPage<HomeProps> = ({ data }) => {
 //   return { props: { data } }
 // }
 
-Home.getInitialProps = async (params) => {
+CharacterDetails.getInitialProps = async (params) => {
   const variables = { id: params.query.id }
-  const data = await graphClient.request(GET_CHARACTER_BY_ID, variables)
+  const data: CharactersDetails = await graphClient.request<CharactersDetails>(
+    GET_CHARACTER_BY_ID,
+    variables
+  )
 
   return { data }
 }
 
-export default Home
+export default CharacterDetails
