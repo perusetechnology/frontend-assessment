@@ -63,7 +63,7 @@ const CharactersPage: NextPage<CharactersPageProps> = ({ data }) => {
   )
 
   const handleClick = (_page: number) => {
-    setPage(page + 1)
+    setPage(_page + 1)
   }
 
   if (isLoading) return <div>Loading</div>
