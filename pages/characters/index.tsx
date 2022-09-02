@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import type { NextPage } from "next"
 import Image from "next/image"
 import graphClient from "../../graphql/client"
@@ -8,6 +8,7 @@ import { Button } from "@mui/material"
 import { Container } from "@mui/material"
 import { useQuery } from "react-query"
 import { Characters } from "../../graphql/types"
+import { useRouter } from "next/router"
 
 interface CharactersPageProps {
   data: Characters
@@ -50,21 +51,39 @@ const columns: GridColDef[] = [
 ]
 
 const CharactersPage: NextPage<CharactersPageProps> = ({ data }) => {
-  const [page, setPage] = useState<number>(1)
+  const router = useRouter()
+  const { page } = router.query
+
+  const [currentPage, setCurrentPage] = useState<number>(1)
+
+  const handleClick = useCallback(
+    (_page: number) => {
+      const _current = _page + 1
+
+      setCurrentPage(_current)
+      router.replace({
+        query: { ...router.query, page: _current },
+      })
+    },
+    [setCurrentPage, router]
+  )
+
+  useEffect(() => {
+    if (page) {
+      setCurrentPage(parseInt(page as string))
+    }
+  }, [])
 
   const {
     data: charactersData,
     isLoading,
     isRefetching,
   } = useQuery<Characters>(
-    ["allCharacters", page],
-    async () => await graphClient.request(GET_ALL_CHARACTERS, { page: page }),
+    ["allCharacters", currentPage],
+    async () =>
+      await graphClient.request(GET_ALL_CHARACTERS, { page: currentPage }),
     { initialData: data }
   )
-
-  const handleClick = (_page: number) => {
-    setPage(_page + 1)
-  }
 
   if (isLoading) return <div>Loading</div>
 
@@ -83,6 +102,7 @@ const CharactersPage: NextPage<CharactersPageProps> = ({ data }) => {
           onPageChange={(newPage: number) => handleClick(newPage)}
           loading={isLoading || isRefetching}
           paginationMode="server"
+          page={currentPage - 1}
           rows={results}
           rowCount={count}
           columns={columns}
