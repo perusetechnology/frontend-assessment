@@ -20,8 +20,8 @@ export const GET_CHARACTER_BY_ID = gql`
   }
 `
 export const GET_ALL_CHARACTERS = gql`
-  query {
-    characters {
+  query allCharacter($page: Int) {
+    characters(page: $page) {
       info {
         pages
         count

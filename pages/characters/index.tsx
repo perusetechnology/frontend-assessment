@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import type { NextPage } from "next"
 import { GetStaticPaths } from "next"
 import { GetStaticProps } from "next"
@@ -12,13 +12,10 @@ import { GridCellValue } from "@mui/x-data-grid"
 import { DataGrid } from "@mui/x-data-grid"
 import { Button } from "@mui/material"
 import { Container } from "@mui/material"
+import { useQuery } from "react-query"
 
 interface HomeProps {
   data: any
-}
-
-const handleClick = (e: any) => {
-  console.log("eeee", e)
 }
 
 const columns: GridColDef[] = [
@@ -58,18 +55,33 @@ const columns: GridColDef[] = [
 ]
 
 const Home: NextPage<HomeProps> = ({ data }) => {
+  const [page, setPage] = useState(1)
+
+  const { data: charactersData, isLoading } = useQuery(
+    ["allCharacters", page],
+    async () => await graphClient.request(GET_ALL_CHARACTERS, { page: page }),
+    { initialData: data }
+  )
+
+  const handleClick = (e: any) => {
+    setPage(e + 1)
+  }
+
+  if (isLoading) return <div>Loading</div>
+
   const {
     characters: {
       info: { pages, count },
       results,
     },
-  } = data
+  } = charactersData
 
   return (
     <Container>
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
           onPageChange={(newPage: any) => handleClick(newPage)}
+          paginationMode="server"
           rows={results}
           rowCount={count}
           columns={columns}

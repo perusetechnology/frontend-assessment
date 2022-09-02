@@ -2,25 +2,18 @@ import React from "react"
 import { MenuItem } from "@mui/material"
 import { Menu } from "@mui/material"
 import type { NextPage } from "next"
-import { GetStaticPaths } from "next"
-import { GetStaticProps } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import graphClient from "../graphql/client"
 import { GET_ALL_CHARACTERS_COUNT } from "../graphql/queries"
 import { Container } from "@mui/material"
+import { Characters } from "../graphql/types"
 
 interface HomeProps {
-  data: any
+  count: number
 }
 
-const Home: NextPage<HomeProps> = ({ data }) => {
-  const {
-    characters: {
-      info: { count },
-    },
-  } = data
-
+const Home: NextPage<HomeProps> = ({ count }) => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget)
@@ -58,9 +51,15 @@ const Home: NextPage<HomeProps> = ({ data }) => {
 }
 
 Home.getInitialProps = async () => {
-  const data = await graphClient.request(GET_ALL_CHARACTERS_COUNT)
+  const data: Characters = await graphClient.request(GET_ALL_CHARACTERS_COUNT)
 
-  return { data }
+  const {
+    characters: {
+      info: { count },
+    },
+  } = data
+
+  return { count }
 }
 
 export default Home

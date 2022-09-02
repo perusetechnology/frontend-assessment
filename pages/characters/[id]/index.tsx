@@ -4,15 +4,14 @@ import { GetStaticPaths } from "next"
 import { GetStaticProps } from "next"
 import Image from "next/image"
 import Link from "next/link"
+import { useQuery } from "react-query"
 import graphClient from "../../../graphql/client"
-import { GET_CHARACTER_BY_ID } from "../../../graphql/queries"
 
 interface HomeProps {
   data: any
 }
 
 const Home: NextPage<HomeProps> = ({ data }) => {
-  console.log("data", data)
   const { charactersByIds } = data
   const {
     name,
@@ -36,6 +35,7 @@ const Home: NextPage<HomeProps> = ({ data }) => {
 
 // export const getStaticPaths: GetStaticPaths = async () => {
 //   return {
+
 //     paths: [],
 //     fallback: true,
 //   }
