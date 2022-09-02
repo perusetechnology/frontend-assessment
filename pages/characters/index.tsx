@@ -52,14 +52,18 @@ const columns: GridColDef[] = [
 const CharactersPage: NextPage<CharactersPageProps> = ({ data }) => {
   const [page, setPage] = useState<number>(1)
 
-  const { data: charactersData, isLoading } = useQuery<Characters>(
+  const {
+    data: charactersData,
+    isLoading,
+    isRefetching,
+  } = useQuery<Characters>(
     ["allCharacters", page],
     async () => await graphClient.request(GET_ALL_CHARACTERS, { page: page }),
     { initialData: data }
   )
 
   const handleClick = (_page: number) => {
-    setPage(_page > page ? page + 1 : page - 1)
+    setPage(page + 1)
   }
 
   if (isLoading) return <div>Loading</div>
@@ -77,6 +81,7 @@ const CharactersPage: NextPage<CharactersPageProps> = ({ data }) => {
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
           onPageChange={(newPage: number) => handleClick(newPage)}
+          loading={isLoading || isRefetching}
           paginationMode="server"
           rows={results}
           rowCount={count}
